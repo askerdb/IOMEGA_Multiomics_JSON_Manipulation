@@ -14,11 +14,15 @@ url_template = "https://www.ebi.ac.uk/ena/data/warehouse/filereport?accession=%s
 output_base = "../../data/"
 
 jo = json.load(open(jsonfile, 'r'))
-for genome in jo["genomes"]:
-    name = output_base + genome['genome_label'] + "_" +genome['genome_ID']['ENA_NCBI_accession'] + "fastq.gz"
+for index,genome in enumerate(jo["genomes"]):
+    if genome['genome_ID']['ENA_NCBI_accession'].find("sample") != -1:
+        next
+    name = output_base + genome['genome_label'] + "_" +genome['genome_ID']['ENA_NCBI_accession'] + ".fastq.gz"
     response = ul.urlopen(url_template % (genome['genome_ID']['ENA_NCBI_accession']))
     html = response.read()
     file_url = (html.split("\n")[1])
-    print(file_url)
+    if index % 20 == 0:
+        print("%s / %s" % (index, len(jo["genomes"])))
+    
     get_large_file('ftp://'+file_url, name)
 
